@@ -34,7 +34,7 @@ pluginBundle {
 	description = "Provides publishing of artifacts to CaptainJack Bintray repository"
 	tags = listOf("capjack")
 	
-	plugins["CapjackPublish"].displayName = "Capjack Publish plugin"
+	plugins["CapjackPublish"].displayName = "CapjackPublish plugin"
 }
 
 tasks.getByName("postRelease").dependsOn("publishPlugins")
