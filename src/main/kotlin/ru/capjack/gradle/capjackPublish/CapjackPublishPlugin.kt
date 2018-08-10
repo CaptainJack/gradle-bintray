@@ -16,7 +16,7 @@ class CapjackPublishPlugin : Plugin<Project> {
 		project.pluginManager.apply(MavenPublishPlugin::class.java)
 		project.pluginManager.apply(BintrayPlugin::class.java)
 		
-		project.extensions.create("capjackPublish", CapjackPublishExtension::class.java)
+		project.extensions.create(CapjackPublishExtension::class.java, "capjackPublish", CapjackPublishExtensionImpl::class.java, project)
 		
 		project.afterEvaluate(::configure)
 	}
