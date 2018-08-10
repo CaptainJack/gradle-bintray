@@ -15,8 +15,13 @@ repositories {
 }
 
 dependencies {
-	implementation(kotlin("stdlib"))
+	implementation(kotlin("stdlib-jdk8"))
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
+}
+
+JavaVersion.VERSION_1_8.also {
+	configure<JavaPluginConvention> { sourceCompatibility = it }
+	tasks.withType<KotlinCompile> { kotlinOptions.jvmTarget = it.toString() }
 }
 
 gradlePlugin {
