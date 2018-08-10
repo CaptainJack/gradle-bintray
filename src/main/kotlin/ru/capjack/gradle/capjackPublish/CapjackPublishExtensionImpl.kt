@@ -4,7 +4,7 @@ import org.gradle.api.Project
 
 open class CapjackPublishExtensionImpl(project: Project) : CapjackPublishExtension {
 	override var githubRepository: String = project.name
-	override var publication: String = "lib"
+	override var publication: String? = null
 	
 	override var bintrayRepository: String = "maven"
 	override var bintrayUser: String? = project.findProperty("capjack.bintrayUser") as String?

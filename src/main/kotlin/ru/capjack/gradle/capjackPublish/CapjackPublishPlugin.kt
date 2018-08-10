@@ -25,8 +25,13 @@ class CapjackPublishPlugin : Plugin<Project> {
 		val cj = project.extensions.getByType(CapjackPublishExtension::class.java)
 		val publications = project.extensions.getByType(PublishingExtension::class.java).publications
 		
-		if (null == publications.findByName(cj.publication) && project.plugins.hasPlugin(JavaPlugin::class.java)) {
-			publications.create(cj.publication, MavenPublication::class.java) {
+		val publication = cj.publication
+			?: (publications.find { !it.name.endsWith("PluginMarkerMaven") }?.name)
+			?: project.name
+		
+		
+		if (null == publications.findByName(publication) && project.plugins.hasPlugin(JavaPlugin::class.java)) {
+			publications.create(publication, MavenPublication::class.java) {
 				from(project.components["java"])
 				project.tasks.findByName("sourcesJar")?.also { artifact(it) }
 			}
@@ -42,7 +47,7 @@ class CapjackPublishPlugin : Plugin<Project> {
 			user = cj.bintrayUser
 			key = cj.bintrayKey
 			
-			setPublications(cj.publication)
+			setPublications(publication)
 			
 			pkg.apply {
 				name = project.name
