@@ -20,11 +20,9 @@ dependencies {
 }
 
 gradlePlugin {
-	(plugins) {
-		"CapjackPublish" {
-			id = "ru.capjack.capjack-publish"
-			implementationClass = "ru.capjack.gradle.capjackPublish.CapjackPublishPlugin"
-		}
+	plugins.create("CapjackPublish") {
+		id = "ru.capjack.capjack-publish"
+		implementationClass = "ru.capjack.gradle.capjackPublish.CapjackPublishPlugin"
 	}
 }
 
