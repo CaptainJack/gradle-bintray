@@ -2,7 +2,7 @@ package ru.capjack.gradle.capjackPublish
 
 import org.gradle.api.Project
 
-class CapjackPublishExtensionImpl(project: Project) : CapjackPublishExtension {
+open class CapjackPublishExtensionImpl(project: Project) : CapjackPublishExtension {
 	override var githubRepository: String = project.name
 	override var publication: String = "lib"
 	
