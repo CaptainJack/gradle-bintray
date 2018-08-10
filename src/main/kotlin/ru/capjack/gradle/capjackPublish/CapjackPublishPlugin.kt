@@ -27,7 +27,7 @@ class CapjackPublishPlugin : Plugin<Project> {
 		
 		val publication = cj.publication
 			?: (publications.find { !it.name.endsWith("PluginMarkerMaven") }?.name)
-			?: project.name
+			?: project.name.split(Regex("[-_ ]")).joinToString("") { it.capitalize() }
 		
 		
 		if (null == publications.findByName(publication) && project.plugins.hasPlugin(JavaPlugin::class.java)) {
