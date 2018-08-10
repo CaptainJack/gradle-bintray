@@ -1,0 +1,1 @@
+# gradle-capjack-publish
