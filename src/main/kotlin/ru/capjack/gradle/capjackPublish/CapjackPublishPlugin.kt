@@ -57,6 +57,7 @@ class CapjackPublishPlugin : Plugin<Project> {
 				websiteUrl = githubUrl
 				issueTrackerUrl = "$githubUrl/issues"
 				vcsUrl = "$githubUrl.git"
+				publish = cj.bintrayPublish
 				
 				version.name = project.version.toString()
 				
