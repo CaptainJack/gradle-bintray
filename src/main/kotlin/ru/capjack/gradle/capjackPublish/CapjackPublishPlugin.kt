@@ -80,12 +80,17 @@ class CapjackPublishPlugin : Plugin<Project> {
 			else p = p.parent
 		}
 		
-		return file?.run {
+		file?.apply {
 			useLines { lines ->
-				if (lines.any { it.contains("Apache License") }) "Apache-2.0"
-				else null
+				lines.forEach { line ->
+					when {
+						line.contains("Apache License") -> return "Apache-2.0"
+						line.contains("MIT License")    -> return "MIT"
+					}
+				}
 			}
 		}
+		return null
 	}
 	
 }
