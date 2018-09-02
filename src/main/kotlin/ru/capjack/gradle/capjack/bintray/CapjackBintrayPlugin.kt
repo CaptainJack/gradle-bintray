@@ -1,4 +1,4 @@
-package ru.capjack.gradle.capjackPublish
+package ru.capjack.gradle.capjack.bintray
 
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayPlugin
@@ -11,53 +11,52 @@ import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.kotlin.dsl.get
 import java.io.File
 
-class CapjackPublishPlugin : Plugin<Project> {
+class CapjackBintrayPlugin : Plugin<Project> {
 	override fun apply(project: Project) {
 		project.pluginManager.apply(MavenPublishPlugin::class.java)
 		project.pluginManager.apply(BintrayPlugin::class.java)
 		
-		project.extensions.create(CapjackPublishExtension::class.java, "capjackPublish", CapjackPublishExtensionImpl::class.java, project)
+		project.extensions.create(CapjackBintrayExtension::class.java, "capjackBintray", CapjackBintrayExtensionImpl::class.java, project)
 		
 		project.afterEvaluate(::configure)
 	}
 	
 	private fun configure(project: Project) {
-		val cj = project.extensions.getByType(CapjackPublishExtension::class.java)
-		val publications = project.extensions.getByType(PublishingExtension::class.java).publications
+		val ext = project.extensions.getByType(CapjackBintrayExtension::class.java)
+		val publishingPublications = project.extensions.getByType(PublishingExtension::class.java).publications
 		
-		val publication = cj.publication
-			?: (publications.find { !it.name.endsWith("PluginMarkerMaven") }?.name)
-			?: project.name.split(Regex("[-_ ]")).joinToString("") { it.capitalize() }
+		val publications = ext.publications.takeIf { it.isNotEmpty() }
+			?: listOf(project.name.split(Regex("[-_ ]")).joinToString("") { it.capitalize() })
 		
 		
-		if (null == publications.findByName(publication) && project.plugins.hasPlugin(JavaPlugin::class.java)) {
-			publications.create(publication, MavenPublication::class.java) {
+		if (publishingPublications.none { publications.contains(it.name) } && project.plugins.hasPlugin(JavaPlugin::class.java)) {
+			publishingPublications.create(publications[0], MavenPublication::class.java) {
 				from(project.components["java"])
 				project.tasks.findByName("sourcesJar")?.also { artifact(it) }
 			}
 		}
 		
 		project.extensions.getByType(BintrayExtension::class.java).apply {
-			val repository = cj.githubRepository.let {
+			val githubRepository = ext.github.let {
 				if (it.contains('/')) it
 				else "CaptainJack/$it"
 			}
-			val githubUrl = "https://github.com/$repository"
+			val githubUrl = "https://github.com/$githubRepository"
 			
-			user = cj.bintrayUser
-			key = cj.bintrayKey
+			user = ext.user
+			key = ext.key
 			
-			setPublications(publication)
+			setPublications(*publications.toTypedArray())
 			
 			pkg.apply {
 				name = project.name
 				userOrg = "capjack"
-				repo = cj.bintrayRepository
-				githubRepo = repository
+				repo = ext.repository
+				githubRepo = githubRepository
 				websiteUrl = githubUrl
 				issueTrackerUrl = "$githubUrl/issues"
 				vcsUrl = "$githubUrl.git"
-				publish = cj.bintrayPublish
+				publish = ext.publish
 				
 				version.name = project.version.toString()
 				

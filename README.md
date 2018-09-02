@@ -1,3 +1,3 @@
-# CapjackPublish gradle plugin
+# CapJack Bintray gradle plugin
 
-Provides publishing of artifacts to CaptainJack Bintray repository
+Provides publishing of artifacts to CapJack Bintray repository

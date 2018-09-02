@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	kotlin("jvm") version "1.2.51"
 	`kotlin-dsl`
 	`java-gradle-plugin`
 	id("com.gradle.plugin-publish") version "0.10.0"
@@ -15,29 +14,25 @@ repositories {
 }
 
 dependencies {
-	implementation(kotlin("stdlib-jdk8"))
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
 }
 
-JavaVersion.VERSION_1_8.also {
-	configure<JavaPluginConvention> { sourceCompatibility = it }
-	tasks.withType<KotlinCompile> { kotlinOptions.jvmTarget = it.toString() }
-}
+tasks.withType<KotlinCompile> { kotlinOptions.jvmTarget = "1.8" }
+
+tasks["postRelease"].dependsOn("publishPlugins")
 
 gradlePlugin {
-	plugins.create("CapjackPublish") {
-		id = "ru.capjack.capjack-publish"
-		implementationClass = "ru.capjack.gradle.capjackPublish.CapjackPublishPlugin"
+	plugins.create("CapjackBintray") {
+		id = "ru.capjack.capjack-bintray"
+		implementationClass = "ru.capjack.gradle.capjack.bintray.CapjackBintrayPlugin"
 	}
 }
 
 pluginBundle {
-	vcsUrl = "https://github.com/CaptainJack/gradle-capjack-publish"
+	vcsUrl = "https://github.com/CaptainJack/gradle-capjack-bintray"
 	website = vcsUrl
 	description = "Provides publishing of artifacts to CaptainJack Bintray repository"
 	tags = listOf("capjack")
 	
-	plugins["CapjackPublish"].displayName = "CapjackPublish plugin"
+	plugins["CapjackBintray"].displayName = "CapJack Bintray plugin"
 }
-
-tasks.getByName("postRelease").dependsOn("publishPlugins")
