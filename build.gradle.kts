@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	`kotlin-dsl`
 	`java-gradle-plugin`
+	`maven-publish`
 	id("com.gradle.plugin-publish") version "0.10.0"
 	id("nebula.release") version "6.3.5"
 }
