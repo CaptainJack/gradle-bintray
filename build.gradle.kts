@@ -26,7 +26,7 @@ gradlePlugin {
 	plugins.create("CapjackBintray") {
 		id = "ru.capjack.capjack-bintray"
 		implementationClass = "ru.capjack.gradle.capjack.bintray.CapjackBintrayPlugin"
-		displayName = "CapJack Bintray plugin"
+		displayName = "Capjack Bintray plugin"
 	}
 }
 
