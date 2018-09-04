@@ -1,3 +1,4 @@
+import com.gradle.publish.MavenCoordinates
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -25,6 +26,7 @@ gradlePlugin {
 	plugins.create("CapjackBintray") {
 		id = "ru.capjack.capjack-bintray"
 		implementationClass = "ru.capjack.gradle.capjack.bintray.CapjackBintrayPlugin"
+		displayName = "CapJack Bintray plugin"
 	}
 }
 
@@ -33,6 +35,4 @@ pluginBundle {
 	website = vcsUrl
 	description = "Provides publishing of artifacts to CaptainJack Bintray repository"
 	tags = listOf("capjack")
-	
-	plugins["CapjackBintray"].displayName = "CapJack Bintray plugin"
 }
