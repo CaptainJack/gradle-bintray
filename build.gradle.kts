@@ -19,15 +19,11 @@ dependencies {
 	implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
 }
 
-tasks.withType<KotlinCompile> { kotlinOptions.jvmTarget = "1.8" }
-
-tasks["postRelease"].dependsOn("publishPlugins")
-
 gradlePlugin {
 	plugins.create("CapjackBintray") {
 		id = "ru.capjack.capjack-bintray"
 		implementationClass = "ru.capjack.gradle.capjack.bintray.CapjackBintrayPlugin"
-		displayName = "Capjack Bintray plugin"
+		displayName = "CapjackBintray"
 	}
 }
 
@@ -37,3 +33,5 @@ pluginBundle {
 	description = "Provides publishing of artifacts to CaptainJack Bintray repository"
 	tags = listOf("capjack")
 }
+
+tasks["postRelease"].dependsOn("publishPlugins")
