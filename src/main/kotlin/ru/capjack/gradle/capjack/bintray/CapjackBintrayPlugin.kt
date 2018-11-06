@@ -49,7 +49,7 @@ class CapjackBintrayPlugin : Plugin<Project> {
 			setPublications(*publications.toTypedArray())
 			
 			pkg.apply {
-				name = project.name
+				name = ext.name
 				userOrg = "capjack"
 				repo = ext.repository
 				githubRepo = githubRepository
