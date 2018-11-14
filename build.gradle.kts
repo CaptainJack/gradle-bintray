@@ -9,7 +9,7 @@ plugins {
 	id("nebula.release") version "8.0.3"
 }
 
-group = "ru.capjack.gradle.capjack"
+group = "ru.capjack.gradle"
 
 repositories {
 	jcenter()
