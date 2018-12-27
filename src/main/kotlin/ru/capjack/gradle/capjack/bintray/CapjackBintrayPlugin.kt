@@ -10,8 +10,10 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class CapjackBintrayPlugin : Plugin<Project> {
 	override fun apply(project: Project) {
@@ -36,7 +38,15 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		val publicationNames = ext.publications.toMutableSet()
 		
 		if (publicationNames.isEmpty()) {
-			publicationNames.add(rootProject.name)
+			val kmp = rootProject.extensions.findByType<KotlinMultiplatformExtension>()
+			if (kmp == null) {
+				publicationNames.add(rootProject.name)
+			}
+			else {
+				publicationNames.addAll(
+					kmp.targets.filter { it.publishable }.map { it.name }
+				)
+			}
 		}
 		
 		val projects = rootProject.allprojects
