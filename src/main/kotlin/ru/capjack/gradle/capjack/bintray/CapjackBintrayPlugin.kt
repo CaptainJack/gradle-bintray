@@ -38,6 +38,7 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		val publicationNames = ext.publications.toMutableSet()
 		
 		if (publicationNames.isEmpty() || publicationNames.contains("*")) {
+			publicationNames.remove("*")
 			val kmp = rootProject.extensions.findByType<KotlinMultiplatformExtension>()
 			if (kmp == null) {
 				publicationNames.add(rootProject.name)
