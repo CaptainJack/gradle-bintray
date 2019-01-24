@@ -41,15 +41,6 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		
 		if (requiredPublications.isEmpty()) {
 			requiredPublications.add(":")
-			val kmp = rootProject.extensions.findByType<KotlinMultiplatformExtension>()
-			if (kmp == null) {
-				publicationNames.add(rootProject.name)
-			}
-			else {
-				publicationNames.addAll(
-					kmp.targets.filter { it.publishable }.map { it.name }
-				)
-			}
 		}
 		
 		requiredPublications.forEach { name ->
