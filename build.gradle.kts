@@ -1,6 +1,3 @@
-import com.gradle.publish.MavenCoordinates
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
 	`kotlin-dsl`
 	`java-gradle-plugin`

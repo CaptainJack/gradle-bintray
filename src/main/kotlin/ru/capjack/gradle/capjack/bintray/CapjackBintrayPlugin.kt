@@ -4,6 +4,7 @@ import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.publish.PublicationContainer
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -34,11 +35,12 @@ class CapjackBintrayPlugin : Plugin<Project> {
 	
 	private fun configure(rootProject: Project) {
 		val ext = rootProject.extensions.getByType<CapjackBintrayExtension>()
+		val requiredPublications = ext.publications.toMutableSet()
 		val publications = rootProject.extensions.getByType<PublishingExtension>().publications
-		val publicationNames = ext.publications.toMutableSet()
+		val publicationNames = mutableSetOf<String>()
 		
-		if (publicationNames.isEmpty() || publicationNames.contains("*")) {
-			publicationNames.remove("*")
+		if (requiredPublications.isEmpty()) {
+			requiredPublications.add(":")
 			val kmp = rootProject.extensions.findByType<KotlinMultiplatformExtension>()
 			if (kmp == null) {
 				publicationNames.add(rootProject.name)
@@ -50,12 +52,29 @@ class CapjackBintrayPlugin : Plugin<Project> {
 			}
 		}
 		
-		val projects = rootProject.allprojects
-		
-		publicationNames.filter { publications.findByName(it) == null }.forEach { name ->
-			projects.find { it.name == name }
-				?.also { providePublication(publications, it) }
-				?: rootProject.logger.error("Project for publication '$name' not found")
+		requiredPublications.forEach { name ->
+			if (publications.findByName(name) != null) {
+				publicationNames.add(name)
+			}
+			else if (name.startsWith(':')) {
+				val project = rootProject.project(name)
+				val kmp = project.extensions.findByType<KotlinMultiplatformExtension>()
+				if (kmp == null) {
+					val publication = project.name
+						.split('_', '-')
+						.joinToString("", transform = String::capitalize)
+						.decapitalize()
+					publicationNames.add(publication)
+					providePublication(publications, project, publication)
+				}
+				else {
+					publicationNames.addAll(kmp.targets.filter { it.publishable }.map { it.name })
+				}
+				
+			}
+			else {
+				throw UnknownDomainObjectException("Publication '$name' not found")
+			}
 		}
 		
 		rootProject.configure<BintrayExtension> {
@@ -87,10 +106,10 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		}
 	}
 	
-	private fun providePublication(publications: PublicationContainer, project: Project) {
+	private fun providePublication(publications: PublicationContainer, project: Project, name: String) {
 		project.whenEvaluated {
 			if (project.pluginManager.hasPlugin("org.gradle.java")) {
-				publications.create<MavenPublication>(project.name) {
+				publications.create<MavenPublication>(name) {
 					artifactId = project.name
 					groupId = project.group.toString()
 					version = project.version.toString()
