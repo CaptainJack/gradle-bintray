@@ -1,7 +1,7 @@
 package ru.capjack.gradle.capjack.bintray
 
 interface CapjackBintrayExtension {
-	val name: String
+	var name: String
 	var github: String
 	var publications: List<String>
 	var repository: String
