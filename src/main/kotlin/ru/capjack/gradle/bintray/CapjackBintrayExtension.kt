@@ -1,4 +1,4 @@
-package ru.capjack.gradle.capjack.bintray
+package ru.capjack.gradle.bintray
 
 interface CapjackBintrayExtension {
 	var name: String

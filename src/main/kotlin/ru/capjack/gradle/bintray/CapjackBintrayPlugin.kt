@@ -1,4 +1,4 @@
-package ru.capjack.gradle.capjack.bintray
+package ru.capjack.gradle.bintray
 
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayPlugin

@@ -1,4 +1,4 @@
-package ru.capjack.gradle.capjack.bintray
+package ru.capjack.gradle.bintray
 
 import org.gradle.api.Project
 
