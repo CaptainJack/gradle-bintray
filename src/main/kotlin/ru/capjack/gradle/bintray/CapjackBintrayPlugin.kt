@@ -59,7 +59,7 @@ class CapjackBintrayPlugin : Plugin<Project> {
 					providePublication(publications, project, publication)
 				}
 				else {
-					publicationNames.addAll(kmp.targets.filter { it.publishable }.map { it.name })
+					publicationNames.addAll(project.extensions.getByType<PublishingExtension>().publications.map { it.name })
 				}
 				
 			}
@@ -118,7 +118,7 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		}
 	}
 	
-	private fun <T> Project.whenEvaluated(fn: () -> Unit) {
+	private fun Project.whenEvaluated(fn: () -> Unit) {
 		if (state.executed) fn()
 		else afterEvaluate { fn() }
 	}

@@ -3,7 +3,7 @@ plugins {
 	`java-gradle-plugin`
 	`maven-publish`
 	id("com.gradle.plugin-publish") version "0.10.1"
-	id("nebula.release") version "10.0.1"
+	id("nebula.release") version "10.1.2"
 }
 
 group = "ru.capjack.gradle"
