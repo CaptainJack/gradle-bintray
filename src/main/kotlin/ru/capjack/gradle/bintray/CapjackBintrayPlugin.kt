@@ -2,18 +2,21 @@ package ru.capjack.gradle.bintray
 
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayPlugin
+import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.publish.PublicationContainer
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.internal.publication.MavenPublicationInternal
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class CapjackBintrayPlugin : Plugin<Project> {
@@ -93,6 +96,25 @@ class CapjackBintrayPlugin : Plugin<Project> {
 				version.name = rootProject.version.toString()
 				
 				defineLicense(rootProject)?.also { setLicenses(it) }
+			}
+		}
+		
+		rootProject.tasks.withType<BintrayUploadTask> {
+			val task = this
+			doFirst {
+				task.publications.mapNotNull {
+					when (it) {
+						is String                   -> project.extensions.getByType<PublishingExtension>().publications.findByName(it) as? MavenPublicationInternal
+						is MavenPublicationInternal -> it
+						else                        -> null
+					}
+				}.forEach {
+					it.publishableArtifacts.forEach { a ->
+						if (a.extension == "module") {
+							it.artifact(a)
+						}
+					}
+				}
 			}
 		}
 	}
