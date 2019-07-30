@@ -4,7 +4,7 @@ import org.gradle.api.Project
 
 open class CapjackBintrayExtensionImpl(project: Project) : CapjackBintrayExtension {
 	override var name: String = project.rootProject.name
-	override var github: String = project.rootDir.name
+	override var github: String = project.rootProject.name
 	override var publications: List<String> = emptyList()
 	
 	override var repository: String = "public"

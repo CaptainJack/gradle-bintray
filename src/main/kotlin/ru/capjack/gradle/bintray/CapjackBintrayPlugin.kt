@@ -21,13 +21,6 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class CapjackBintrayPlugin : Plugin<Project> {
 	override fun apply(project: Project) {
-		val rootProject = project.rootProject
-		
-		if (project != rootProject) {
-			project.logger.error("Plugin ru.capjack.capjack-bintray is applicable only to root project")
-			return
-		}
-		
 		project.pluginManager.apply(BintrayPlugin::class.java)
 		project.pluginManager.apply(MavenPublishPlugin::class.java)
 		
@@ -36,42 +29,26 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		project.afterEvaluate(::configure)
 	}
 	
-	private fun configure(rootProject: Project) {
-		val ext = rootProject.extensions.getByType<CapjackBintrayExtension>()
-		val requiredPublications = ext.publications.toMutableSet()
-		val publications = rootProject.extensions.getByType<PublishingExtension>().publications
+	private fun configure(project: Project) {
+		val ext = project.extensions.getByType<CapjackBintrayExtension>()
+		val publications = project.extensions.getByType<PublishingExtension>().publications
 		val publicationNames = mutableSetOf<String>()
 		
-		if (requiredPublications.isEmpty()) {
-			requiredPublications.add(":")
+		if (ext.publications.isEmpty()) {
+			publicationNames.addAll(publications.map { it.name })
 		}
-		
-		requiredPublications.forEach { name ->
-			if (publications.findByName(name) != null) {
-				publicationNames.add(name)
-			}
-			else if (name.startsWith(':')) {
-				val project = rootProject.project(name)
-				val kmp = project.extensions.findByType<KotlinMultiplatformExtension>()
-				if (kmp == null) {
-					val publication = project.name
-						.split('_', '-')
-						.joinToString("", transform = String::capitalize)
-						.decapitalize()
-					publicationNames.add(publication)
-					providePublication(publications, project, publication)
+		else {
+			ext.publications.forEach { name ->
+				if (publications.findByName(name) != null) {
+					publicationNames.add(name)
 				}
 				else {
-					publicationNames.addAll(project.extensions.getByType<PublishingExtension>().publications.map { it.name })
+					throw UnknownDomainObjectException("Publication '$name' not found")
 				}
-				
-			}
-			else {
-				throw UnknownDomainObjectException("Publication '$name' not found")
 			}
 		}
 		
-		rootProject.configure<BintrayExtension> {
+		project.configure<BintrayExtension> {
 			val githubRepository = ext.github.let {
 				if (it.contains('/')) it
 				else "CaptainJack/$it"
@@ -93,13 +70,13 @@ class CapjackBintrayPlugin : Plugin<Project> {
 				vcsUrl = "$githubUrl.git"
 				publish = ext.publish
 				
-				version.name = rootProject.version.toString()
+				version.name = project.version.toString()
 				
-				defineLicense(rootProject)?.also { setLicenses(it) }
+				defineLicense(project)?.also { setLicenses(it) }
 			}
 		}
 		
-		rootProject.tasks.withType<BintrayUploadTask> {
+		project.tasks.withType<BintrayUploadTask> {
 			val task = this
 			doFirst {
 				task.publications.mapNotNull {
@@ -119,34 +96,13 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		}
 	}
 	
-	private fun providePublication(publications: PublicationContainer, project: Project, name: String) {
-		project.whenEvaluated {
-			if (project.pluginManager.hasPlugin("org.gradle.java")) {
-				publications.create<MavenPublication>(name) {
-					artifactId = project.name
-					groupId = project.group.toString()
-					version = project.version.toString()
-					
-					from(project.components["java"])
-					project.tasks.findByName("sourcesJar")?.also {
-						artifact(it)
-					}
-					
-				}
-			}
-			else {
-				project.logger.error("Can't provide publication, because project '${project.name}' is not have java component")
-			}
-		}
-	}
-	
 	private fun Project.whenEvaluated(fn: () -> Unit) {
 		if (state.executed) fn()
 		else afterEvaluate { fn() }
 	}
 	
 	private fun defineLicense(project: Project): String? {
-		return project.file("LICENSE").takeIf { it.isFile }?.useLines { lines ->
+		return project.rootProject.file("LICENSE").takeIf { it.isFile }?.useLines { lines ->
 			for (line in lines) when {
 				line.contains("Apache License") -> return "Apache-2.0"
 				line.contains("MIT License")    -> return "MIT"
