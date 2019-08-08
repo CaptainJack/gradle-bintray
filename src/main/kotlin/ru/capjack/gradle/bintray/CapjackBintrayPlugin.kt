@@ -11,14 +11,16 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.internal.publication.MavenPublicationInternal
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
+@Suppress("UnstableApiUsage")
 class CapjackBintrayPlugin : Plugin<Project> {
 	override fun apply(project: Project) {
 		project.pluginManager.apply(BintrayPlugin::class.java)
@@ -35,7 +37,12 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		val publicationNames = mutableSetOf<String>()
 		
 		if (ext.publications.isEmpty()) {
-			publicationNames.addAll(publications.map { it.name })
+			if (publications.isEmpty()) {
+				providePublication(project, publications)?.let(publicationNames::add)
+			}
+			else {
+				publicationNames.addAll(publications.map { it.name })
+			}
 		}
 		else {
 			ext.publications.forEach { name ->
@@ -96,10 +103,33 @@ class CapjackBintrayPlugin : Plugin<Project> {
 		}
 	}
 	
-	private fun Project.whenEvaluated(fn: () -> Unit) {
-		if (state.executed) fn()
-		else afterEvaluate { fn() }
+	private fun providePublication(project: Project, publications: PublicationContainer): String? {
+		val name = project.name.split('_', '-').joinToString("", transform = String::capitalize).decapitalize()
+		
+		if (project.pluginManager.hasPlugin("org.gradle.java")) {
+			
+			var sourcesJar = project.tasks.findByName("sourcesJar")
+			
+			if (sourcesJar == null) {
+				sourcesJar = project.tasks.create<Jar>("sourcesJar") {
+					archiveClassifier.set("sources")
+					from(project.extensions.getByName<SourceSetContainer>("sourceSets")["main"].allSource)
+				}
+			}
+			
+			publications.create<MavenPublication>(name) {
+				artifactId = project.name
+				groupId = project.group.toString()
+				version = project.version.toString()
+				
+				from(project.components["java"])
+				artifact(sourcesJar)
+			}
+		}
+		
+		return null
 	}
+	
 	
 	private fun defineLicense(project: Project): String? {
 		return project.rootProject.file("LICENSE").takeIf { it.isFile }?.useLines { lines ->
