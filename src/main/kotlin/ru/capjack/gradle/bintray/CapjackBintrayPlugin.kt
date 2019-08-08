@@ -125,6 +125,8 @@ class CapjackBintrayPlugin : Plugin<Project> {
 				from(project.components["java"])
 				artifact(sourcesJar)
 			}
+			
+			return name
 		}
 		
 		return null
